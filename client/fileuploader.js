@@ -254,7 +254,6 @@ qq.FileUploaderBasic = function(o){
         debug: false,
         action: '/server/upload',
         params: {},
-        customHeaders: {},
         button: null,
         multiple: true,
         maxConnections: 3,
@@ -327,7 +326,6 @@ qq.FileUploaderBasic.prototype = {
             debug: this._options.debug,
             action: this._options.action,         
             maxConnections: this._options.maxConnections,   
-            customHeaders: this._options.customHeaders,
             onProgress: function(id, fileName, loaded, total){                
                 self._onProgress(id, fileName, loaded, total);
                 self._options.onProgress(id, fileName, loaded, total);                    
@@ -1208,9 +1206,6 @@ qq.extend(qq.UploadHandlerXhr.prototype, {
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         xhr.setRequestHeader("X-File-Name", encodeURIComponent(name));
         xhr.setRequestHeader("Content-Type", "application/octet-stream");
-        for (key in this._options.customHeaders){
-            xhr.setRequestHeader(key, this._options.customHeaders[key]);
-        };
         xhr.send(file);
     },
     _onComplete: function(id, xhr){
