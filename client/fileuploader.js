@@ -1,5 +1,5 @@
 /**
- * http://github.com/valums/file-uploader
+ * https://github.com/digITpro/file-uploader
  *
  * Multiple file upload component with progress-bar, drag-and-drop.
  * © 2010 Andrew Valums ( andrew(at)valums.com )
