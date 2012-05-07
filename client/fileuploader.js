@@ -254,6 +254,7 @@ qq.FileUploaderBasic = function(o){
         debug: false,
         action: '/server/upload',
         params: {},
+        customHeaders: {},
         button: null,
         multiple: true,
         maxConnections: 3,
@@ -327,6 +328,7 @@ qq.FileUploaderBasic.prototype = {
             debug: this._options.debug,
             action: this._options.action,
             maxConnections: this._options.maxConnections,
+            customHeaders: this._options.customHeaders,
             onProgress: function(id, fileName, loaded, total){
                 self._onProgress(id, fileName, loaded, total);
                 self._options.onProgress(id, fileName, loaded, total);
@@ -338,7 +340,8 @@ qq.FileUploaderBasic.prototype = {
             onCancel: function(id, fileName){
                 self._onCancel(id, fileName);
                 self._options.onCancel(id, fileName);
-            }
+            },
+            param_qqfile_name: this._options.param_qqfile_name
         });
 
         return handler;
@@ -972,14 +975,6 @@ qq.extend(qq.UploadHandlerForm.prototype, {
 
         this._inputs[id] = fileInput;
 
-        // Ruby on Rails by default generates an authenticity_token that is used to
-        // prevent CSRF attacks. If this is not copied to the iframed form, the POST will fail.
-        // Other frameworks potentially have their own CSRF protection strategies,
-        // which would also need to be accomodated for here.
-        csrfInput = fileInput.form.childNodes[0].lastChild;
-        if (csrfInput && csrfInput.getAttribute('name') == 'authenticity_token')
-                this._inputs['_csrf'] = csrfInput;
-
         // remove file input from DOM
         if (fileInput.parentNode){
             qq.remove(fileInput);
@@ -1008,7 +1003,6 @@ qq.extend(qq.UploadHandlerForm.prototype, {
     },
     _upload: function(id, params){
         var input = this._inputs[id];
-        var csrf_token = this._inputs['_csrf'];
 
         if (!input){
             throw new Error('file with passed id was not added, or already uploaded or cancelled');
@@ -1019,9 +1013,6 @@ qq.extend(qq.UploadHandlerForm.prototype, {
         var iframe = this._createIframe(id);
         var form = this._createForm(iframe, params);
         form.appendChild(input);
-        if (csrf_token)
-                form.appendChild(csrf_token);
-
 
         var self = this;
         this._attachLoadEvent(iframe, function(){
@@ -1219,6 +1210,9 @@ qq.extend(qq.UploadHandlerXhr.prototype, {
         xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
         xhr.setRequestHeader("X-File-Name", encodeURIComponent(name));
         xhr.setRequestHeader("Content-Type", "application/octet-stream");
+        for (key in this._options.customHeaders){
+           xhr.setRequestHeader(key, this._options.customHeaders[key]);
+        };
         xhr.send(file);
     },
     _onComplete: function(id, xhr){
